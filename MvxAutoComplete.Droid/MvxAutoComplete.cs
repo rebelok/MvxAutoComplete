@@ -23,6 +23,7 @@ namespace MvxAutoComplete.Droid
         private string _searchTerm;
         private readonly IAttributeSet _attrs;
         private ICommand _itemClick;
+        private ProgressBar _progressBar;
 
         public MvxAutoComplete(Context context)
             : base(context)
@@ -43,7 +44,15 @@ namespace MvxAutoComplete.Droid
             set { _searchTerm = value; StartSearch(); }
         }
 
-        public bool IsSearching { get; set; }
+        public bool IsSearching
+        {
+            get { return _isSearching; }
+            set
+            {
+                _isSearching = value;
+                _progressBar.Visibility = value ? ViewStates.Visible : ViewStates.Gone;
+            }
+        }
 
         public int ResultItemTemplateId
         {
@@ -67,6 +76,7 @@ namespace MvxAutoComplete.Droid
             _resultListView = new MvxListView(Context, null);
             AddSearchBox();
             AddResultView();
+            AddProgressView();
             _searcher = Mvx.Resolve<ISearcher>();
             _history = Mvx.Resolve<IHistory>();
         }
@@ -96,7 +106,21 @@ namespace MvxAutoComplete.Droid
             AddView(_resultListView);
             
         }
-        
+
+        private void AddProgressView()
+        {
+            _progressBar = new ProgressBar(Context);
+            var layout = new LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent)
+            {
+                TopMargin = 10
+            };
+            layout.AddRule(LayoutRules.Below, _searchBox.Id);
+            layout.AddRule(LayoutRules.CenterHorizontal);
+            _progressBar.LayoutParameters = layout;
+            _progressBar.Indeterminate = true;
+            AddView(_progressBar);
+
+        }
         private void OnTextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
             _searchTerm = e.Text.ToString();
@@ -130,6 +154,7 @@ namespace MvxAutoComplete.Droid
             _resultListView.Adapter.ItemsSource = enumerable;
         }
         private ICommand _wrappedItemClickCommand;
+        private bool _isSearching;
 
         private ICommand WrappedItemClickCommand
         {

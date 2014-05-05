@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace MvxAutoComplete.TestApp.Core.Models
@@ -22,13 +25,30 @@ namespace MvxAutoComplete.TestApp.Core.Models
             _error = error;
             _take = take;
         }
-       
+
         public static void StartAsyncSearch(string searchTerm, int take, Action<IEnumerable<Article>> success, Action<Exception> error)
         {
             var search = new NYTimesSearch(searchTerm, success, error, take);
             search.StartSearch();
         }
 
+        /*async public static  Task<IEnumerable<Article>> SearchAsync(string searchTerm)
+        {
+            var uri = string.Format(UrlTemplate, searchTerm);
+            var request = WebRequest.Create(new Uri(uri));
+
+            var responseTask = request.GetResponseAsync(new TimeSpan(0, 0, 30));
+            var response = responseTask.Result;
+            string data;
+            using (var responseStream = response.GetResponseStream())
+            {
+                using (var reader = new StreamReader(responseStream))
+                {
+                    data = reader.ReadToEnd();
+                }
+            }
+            return JsonConvert.DeserializeObject<RootObject>(data).Response.Articles;
+        }*/
         private void StartSearch()
         {
             try
